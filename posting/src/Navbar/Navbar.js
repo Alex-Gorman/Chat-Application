@@ -103,11 +103,32 @@ function Navbar() {
             </Link>
           </li>
 
-          {isUserLoggedIn && (
+          <li style={navItemStyle}>
+            <Link to="/SearchPage" style={navItemStyle}>
+                Search
+            </Link>
+          </li>
+
+          <li style={navItemStyle}>
+            <Link to="/LogoutPage" style={navItemStyle}>
+                Logout
+            </Link>
+          </li>
+
+          {/* <li style={navItemStyle}>
+            <Link to="/AdminPage" style={navItemStyle}>
+              Admin
+            </Link>
+          </li> */}
+
+
+
+          {/* {isUserLoggedIn && (
             <li style={navItemStyle} onClick={handleLogout}>
               Logout
             </li>
-          )}
+          )} */}
+
         </ul>
       </div>
     </nav>

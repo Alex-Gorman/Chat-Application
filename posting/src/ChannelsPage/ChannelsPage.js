@@ -41,9 +41,30 @@ function ChannelsPage() {
   const [channels, setChannels] = useState([]);
   const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
 
+  const [doesChannelExist, getChannelName] = useState('');
+
   const handleChannelNameChange = (e) => {
     setChannelName(e.target.value);
   }
+
+  useEffect(() => {
+    // Check if the user is already logged in when the component mounts
+    const checkIfChannelExists = async () => {
+      try {
+        const response = await fetch('http://localhost:3002/isUserLoggedIn', {});
+
+        if (response.status === 200) {
+          setIsUserLoggedIn(true);
+        } else {
+          setIsUserLoggedIn(false);
+        }
+      } catch (error) {
+        console.error('Error during login check:', error);
+      }
+    };
+
+    checkIfChannelExists();
+  }, []);
 
   const handleCreateChannel = async (e) => {
     e.preventDefault();
@@ -174,9 +195,14 @@ function ChannelsPage() {
           </div>
 
           <Routes>
-            <Route path="/ChannelsPage/*" element={<ChannelsPage />} />
-            <Route path="/channel/:channelId" element={<ChannelPage />} />
+            <Route path="/ChannelsPage/*" element={<ChannelsPage />}>
+              <Route index element={<ChannelPage />} />
+              <Route path="channel/:channelName" element={<ChannelPage />} />
+            </Route>
           </Routes>
+
+
+
         </>
       ) : (
         <div>

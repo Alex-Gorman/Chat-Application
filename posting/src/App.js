@@ -4,6 +4,9 @@ import HomePage from './HomePage/HomePage';
 import LoginPage from './LoginPage/LoginPage';
 import ChannelsPage from './ChannelsPage/ChannelsPage';
 import RegisterPage from './RegisterPage/RegisterPage';
+import ChannelPage from './ChannelPage/ChannelPage';
+import SearchPage from './SearchPage/SearchPage';
+import LogoutPage from './LogoutPage/LogoutPage';
 
 
 function App() {
@@ -17,6 +20,9 @@ function App() {
           <Route path="/LoginPage" element={<LoginPage />} />
           <Route path="/ChannelsPage" element={<ChannelsPage />} />
           <Route path="/RegisterPage" element={<RegisterPage />} />
+          <Route path="/channel/*" element={<ChannelPage />} />
+          <Route path="/SearchPage" element={<SearchPage />} />
+          <Route path="/LogoutPage" element={<LogoutPage />} />
 
           </Routes>
       </div>

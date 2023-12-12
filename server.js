@@ -32,8 +32,8 @@ app.post('/postChannel', (req, res) => {
 
   // Insert the new channel data into the 'channels' table
   connection.query(
-    'INSERT INTO channels (channel_name) VALUES (?)',
-    [newChannel.channelName],
+    'INSERT INTO channels (channel_name, created_by) VALUES (?, ?)',
+    [newChannel.channelName, currentUserName],
     (err, result) => {
       if (err) {
         console.error('Error inserting channel:', err);
@@ -45,6 +45,7 @@ app.post('/postChannel', (req, res) => {
     }
   );
 });
+
 
 app.get('/getChannels', (req, res) => {
   connection.query('SELECT * FROM channels', (err, results) => {
@@ -66,11 +67,26 @@ connection.connect((err) => {
     connection.query(`
       CREATE TABLE IF NOT EXISTS channels (
         channel_id INT AUTO_INCREMENT PRIMARY KEY,
-        channel_name VARCHAR(255) NOT NULL
+        channel_name VARCHAR(255) NOT NULL,
+        created_by VARCHAR(255) NOT NULL
       )
     `, (err) => {
       if (err) throw err;
       console.log('Table "channels" created or already exists.');
+    });
+
+    connection.query(`
+      CREATE TABLE IF NOT EXISTS messages (
+        message_id INT AUTO_INCREMENT PRIMARY KEY,
+        channel_name VARCHAR(255) NOT NULL,
+        username VARCHAR(255) NOT NULL,
+        content TEXT NOT NULL,
+        parent_message_id INT,
+        FOREIGN KEY (parent_message_id) REFERENCES messages(message_id)
+      )
+    `, (err) => {
+        if (err) throw err;
+        console.log('Table "messages" created or already exists.');
     });
 
     connection.query(`
@@ -204,6 +220,86 @@ app.post('/logout', (req, res) => {
   isUserLoggedIn = false;
   res.status(200).json({ message: 'Logout successful' });
 });
+
+app.get('/checkChannel/:channelName', (req, res) => {
+  const channelName = req.params.channelName;
+
+  // Check if the channel with the given name exists
+  connection.query('SELECT * FROM channels WHERE channel_name = ?', [channelName], (err, results) => {
+    if (err) {
+      console.error('Error checking channel existence:', err);
+      res.status(500).json({ exists: false });
+    } else {
+      // If there are results, the channel exists; otherwise, it doesn't
+      console.log("channel exists");
+      const channelExists = results.length > 0;
+      res.status(200).json({ exists: channelExists });
+    }
+  });
+});
+
+app.delete('/deleteUser/:username', (req, res) => {
+  const usernameToDelete = req.params.username;
+
+  // Delete the user from the 'users' table
+  connection.query(
+    'DELETE FROM users WHERE username = ?',
+    [usernameToDelete],
+    (err, result) => {
+      if (err) {
+        console.error('Error deleting user:', err);
+        res.status(500).json({ error: 'Failed to delete the user' });
+      } else if (result.affectedRows === 0) {
+        // If no rows were affected, the user with the given username doesn't exist
+        res.status(404).json({ error: 'User not found' });
+      } else {
+        console.log('User deleted successfully');
+        res.status(200).json({ message: 'User deleted successfully' });
+      }
+    }
+  );
+});
+
+app.get('/getCurrentUserName', (req, res) => {
+  res.status(200).json({ currentUserName: currentUserName });
+});
+
+app.post('/postMessage', (req, res) => {
+  console.log('Received a POST request to create a new message');
+
+  const newMessage = req.body;
+
+  // Insert the new message data into the 'messages' table
+  connection.query(
+    'INSERT INTO messages (channel_name, username, content, parent_message_id) VALUES (?, ?, ?, ?)',
+    [newMessage.channelName, currentUserName, newMessage.content, newMessage.parentMessageId],
+    (err, result) => {
+      if (err) {
+        console.error('Error inserting message:', err);
+        res.status(500).json({ message: 'Failed to create a new message' });
+      } else {
+        console.log('Message inserted successfully');
+        res.status(200).json({ message: 'Message created successfully' });
+      }
+    }
+  );
+});
+
+app.get('/getMessages/:channelName', (req, res) => {
+  const channelName = req.params.channelName;
+
+  // Retrieve messages for the given channel from the 'messages' table
+  connection.query('SELECT * FROM messages WHERE channel_name = ?', [channelName], (err, results) => {
+    if (err) {
+      console.error('Error retrieving messages:', err);
+      res.status(500).json({ error: 'Failed to retrieve messages' });
+    } else {
+      console.log("Successfully got the messages for channel:", channelName);
+      res.status(200).json(results);
+    }
+  });
+});
+
 
 
 app.listen(PORT, HOST, () => {

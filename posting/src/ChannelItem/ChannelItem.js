@@ -37,7 +37,7 @@ const ChannelItem = ({ channel, onDelete }) => {
     <div style={itemStyle}>
       <div style={row1Style}>
         <span>
-          <Link to={`/channel/${channel.channel_id}`} style={channelNameStyle}>
+          <Link to={`/channel/${channel.channel_name}`} style={channelNameStyle}>
             {channel.channel_name}
           </Link>
         </span>
@@ -51,6 +51,7 @@ const ChannelItem = ({ channel, onDelete }) => {
 };
 
 export default ChannelItem;
+
 
 
 
