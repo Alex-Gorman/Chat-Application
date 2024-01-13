@@ -43,6 +43,27 @@ function ChannelsPage() {
 
   const [doesChannelExist, getChannelName] = useState('');
 
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
+  useEffect(() => {
+    // Check if the user is already logged in when the component mounts
+    const checkIfAdmin = async () => {
+      try {
+        const response = await fetch('http://localhost:3002/getCurrentUserName', {});
+        const data = await response.json();
+
+        if (response.status === 200 && data.currentUserName === 'Admin') {
+          setIsUserAdmin(true);
+        } else {
+          setIsUserAdmin(false);
+        }
+      } catch (error) {
+        console.error('Error during login check:', error);
+      }
+    };
+
+    checkIfAdmin();
+  }, []);
+
   const handleChannelNameChange = (e) => {
     setChannelName(e.target.value);
   }

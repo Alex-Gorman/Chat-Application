@@ -7,6 +7,7 @@ import RegisterPage from './RegisterPage/RegisterPage';
 import ChannelPage from './ChannelPage/ChannelPage';
 import SearchPage from './SearchPage/SearchPage';
 import LogoutPage from './LogoutPage/LogoutPage';
+import AdminPage from './AdminPage/AdminPage';
 
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/channel/*" element={<ChannelPage />} />
           <Route path="/SearchPage" element={<SearchPage />} />
           <Route path="/LogoutPage" element={<LogoutPage />} />
+          <Route path="/AdminPage" element={<AdminPage />} />
 
           </Routes>
       </div>

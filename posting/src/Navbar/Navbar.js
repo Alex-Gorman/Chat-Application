@@ -115,11 +115,11 @@ function Navbar() {
             </Link>
           </li>
 
-          {/* <li style={navItemStyle}>
+          <li style={navItemStyle}>
             <Link to="/AdminPage" style={navItemStyle}>
               Admin
             </Link>
-          </li> */}
+          </li>
 
 
 

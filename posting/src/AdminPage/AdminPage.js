@@ -7,7 +7,7 @@ function AdminPage() {
     alignItems: 'center',
   };
 
-  const formStyle = {
+    const formStyle = {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
@@ -25,49 +25,101 @@ function AdminPage() {
     marginRight: '10px',
   };
 
+  const userContainerStyle = {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '10px',
+    width: '300px', // Adjust the width as needed
+    padding: '8px', // Add padding for the black box
+    border: '1px solid black', // Add border for the black box
+  };
+
+  const usernameStyle = {
+    marginRight: '10px', // Adjust margin as needed
+  };
+
   const buttonStyle = {
     padding: '5px 10px',
     fontSize: '16px',
-    backgroundColor: 'blue',
+    backgroundColor: 'red',
     color: 'white',
     border: 'none',
     cursor: 'pointer',
   };
 
-  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
+  // const [isUserAdmin, setIsUserAdmin] = useState(false);
+  const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
   useEffect(() => {
     // Check if the user is already logged in when the component mounts
-    const checkIfLoggedIn = async () => {
+    const checkIfAdmin = async () => {
       try {
-        const response = await fetch('http://localhost:3002/isUserLoggedIn', {});
+        const response = await fetch('http://localhost:3002/getCurrentUserName', {});
+        const data = await response.json();
 
-        if (response.status === 200) {
-          setIsUserLoggedIn(true);
+        if (response.status === 200 && data.currentUserName === 'Admin') {
+          setIsUserAdmin(true);
         } else {
-          setIsUserLoggedIn(false);
+          setIsUserAdmin(false);
         }
       } catch (error) {
         console.error('Error during login check:', error);
       }
     };
 
-    checkIfLoggedIn();
+    checkIfAdmin();
   }, []);
 
-  const handleSearch = () => {
-    // Implement your search logic here
-    console.log(`Search term: ${searchTerm}`);
-    // You can send the search term to the server or perform any other search-related actions
+  useEffect(() => {
+    // Fetch the list of users when the component mounts
+    handleSearch();
+  }, []); // The empty dependency array ensures that this effect runs only once, similar to componentDidMount
+
+  const handleSearch = async () => {
+    try {
+      // Fetch the list of users from the server
+      const response = await fetch('http://localhost:3002/getUsers');
+      const data = await response.json();
+
+      // Update the state with the list of users
+      setUsers(data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
+  const handleDeleteUser = async (username) => {
+    try {
+      // Make a DELETE request to delete the user with the given userId
+      const response = await fetch(`http://localhost:3002/deleteUser/${username}`, {
+        method: 'DELETE',
+      });
+  
+      if (response.status === 200) {
+        // User deleted successfully, update the local state
+        setUsers((prevUsers) => prevUsers.filter((user) => user.username !== username));
+      } else {
+        console.error('Error deleting user:', response.statusText);
+        alert('Failed to delete user. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      alert('Failed to delete user. Please try again.');
+    }
   };
 
   return (
     <div style={containerStyle}>
-      <h1>Search List</h1>
+      <h1>Users List</h1>
 
-      {isUserLoggedIn ? (
+      {isUserAdmin ? (
         <>
+
+          <h1>Search bar</h1>
+
           <form style={formStyle}>
             <label style={labelStyle} htmlFor="searchTerm">
               Search Term:
@@ -83,13 +135,26 @@ function AdminPage() {
               Search
             </button>
           </form>
-          
-          {/* Render the list of channels or search results */}
-          {/* <div>
-            {channels && channels.map((channel) => (
-              <ChannelItem key={channel.channel_id} channel={channel} onDelete={handleDeleteChannel} />
+
+          <h1>Users List</h1>
+
+          {/* Display the list of users with delete buttons */}
+          <div>
+            {users && users.map((user) => (
+              <div key={user.user_id} style={userContainerStyle}>
+                <p style={usernameStyle}>{user.username}</p>
+                {user.username !== 'Admin' && ( // Exclude "Admin" user from having a delete button
+                  <button
+                    style={buttonStyle}
+                    type="button"
+                    onClick={() => handleDeleteUser(user.username)}
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
             ))}
-          </div> */}
+          </div>
 
         </>
       ) : (
