@@ -44,22 +44,53 @@ function ChannelPage() {
     }
   };
 
-  const fetchMessages = async () => {
-    try {
-      const response = await fetch(`http://localhost:3002/getMessages/${channelNameFromUrl}`);
-      const data = await response.json();
-      setMessages(data);
-      // alert(messages[0]);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-    }
-  };
+  // Move the logic to update vote counts directly within fetchMessages
+const fetchMessages = async () => {
+  try {
+    const response = await fetch(`http://localhost:3002/getMessages/${channelNameFromUrl}`);
+    const data = await response.json();
+    
+    // Update vote counts for each message
+    const updatedMessages = await Promise.all(data.map(async (message) => {
+      // Fetch vote counts for the message
+      const votes = await fetch(`http://localhost:3002/getVotes/${message.message_id}`);
+      const votesData = await votes.json();
 
-  useEffect(() => {
-    if (messages.length > 0) {
-      // alert(messages[0]);
-    }
-  }, [messages]); 
+      // Return the message with updated vote counts
+      return {
+        ...message,
+        thumbsUpCount: votesData.upVoteCount,
+        thumbsDownCount: votesData.downVoteCount,
+      };
+    }));
+
+    setMessages(updatedMessages);
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+  }
+};
+
+// Effect to initialize the vote counts from localStorage on component mount
+useEffect(() => {
+  fetchMessages();
+}, [channelNameFromUrl]);
+
+  // const fetchMessages = async () => {
+  //   try {
+  //     const response = await fetch(`http://localhost:3002/getMessages/${channelNameFromUrl}`);
+  //     const data = await response.json();
+  //     setMessages(data);
+  //     // alert(messages[0]);
+  //   } catch (error) {
+  //     console.error('Error fetching messages:', error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   if (messages.length > 0) {
+  //     // alert(messages[0]);
+  //   }
+  // }, [messages]); 
 
   const handleSendMessage = async () => {
     try {
