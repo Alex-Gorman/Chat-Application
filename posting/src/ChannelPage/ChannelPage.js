@@ -28,6 +28,7 @@ function ChannelPage() {
   const currentURL = window.location.href;
   const url = new URL(currentURL);
   const channelNameFromUrl = url.pathname.split('/').pop();
+  
 
   const [channelExists, setChannelExists] = useState(true);
   const [messageContent, setMessageContent] = useState('');
@@ -417,8 +418,31 @@ useEffect(() => {
             >
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <div style={{ marginBottom: '10px', width: '100%' }}>
-                  <strong>{message.username}:</strong> {renderContent(message.content)}
+                  {/* <strong style={{ color: message.username === 'Admin' ? 'red' : 'inherit' }}>
+                    {message.username}{message.username === 'Admin' ? ' [A]:' : ':'}
+                  </strong> {renderContent(message.content)} */}
+                  <strong style={{
+                      color: message.username === 'Admin'
+                        ? 'red'
+                        : message.username === channelCreator
+                        ? 'blue'
+                        : 'inherit'
+                    }}>
+                    {message.username} {message.username === 'Admin' ? ' [A]:' : message.username === channelCreator ? ' [C]:' : ':'}
+
+                  </strong> {renderContent(message.content)}
                 </div>
+                {/* <div style={{ marginBottom: '10px', width: '100%' }}>
+                  <strong style={{
+                    color: message.username === 'Admin' ? 'red' :
+                      message.username === 'channelcreator' ? 'blue' : 'inherit'
+                  }}>
+                    {message.username}
+                    {message.username === 'Admin' ? ' [A]:' :
+                      message.username === 'channelcreator' ? ' [C]:' : ':'}
+                  </strong> {renderContent(message.content)}
+                </div> */}
+
                 <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
                   <div>
                     {/* Thumbs up and down buttons are always visible */}
@@ -463,6 +487,7 @@ useEffect(() => {
       </ul>
     );
   };
+  
   
   
 
@@ -654,6 +679,28 @@ const updateVoteCountsInLocalStorage = (messageId, upVotes, downVotes) => {
   //     // Handle error
   //   }
   // };
+
+  const [channelCreator, setChannelCreator] = useState('');
+
+  const fetchChannelCreator = async () => {
+    try {
+      const response = await fetch(`http://localhost:3002/getChannelCreator/${channelNameFromUrl}`);
+      const data = await response.json();
+
+      if (data.creator) {
+        setChannelCreator(data.creator);
+      } else {
+        setChannelCreator('Unknown'); // You can set a default value or handle this case as needed
+      }
+    } catch (error) {
+      console.error('Error fetching channel creator:', error);
+    }
+  };
+
+  useEffect(() => {
+    // Fetch the channel creator when the component mounts or when the channelNameFromUrl changes
+    fetchChannelCreator();
+  }, [channelNameFromUrl]);
   
   
 
@@ -666,6 +713,14 @@ const updateVoteCountsInLocalStorage = (messageId, upVotes, downVotes) => {
               <button style={buttonStyle}>Go Back</button>
             </Link>
             <h2>{channelNameFromUrl}</h2>
+            <p>
+            Created By:{' '}
+            <strong style={{ color: channelCreator === 'Admin' ? 'red' : 'blue' }}>
+              {channelCreator}
+              {channelCreator === 'Admin' && ' [A]'}
+              {channelCreator != 'Admin' && ' [C]'}
+            </strong>
+          </p>
             {/* Display messages */}
             <div>{renderMessagesWithIndentation(messages)}</div>
             {/* <div>

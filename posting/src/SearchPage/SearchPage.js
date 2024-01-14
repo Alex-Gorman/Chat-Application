@@ -108,65 +108,35 @@ function SearchPage() {
     fetchTopUserWithMostPosts();
   }, []); // Empty dependency array ensures this effect runs only once on mount
   
-
   return (
     <div style={containerStyle}>
       <h1>Search List</h1>
-  
+
       {isUserLoggedIn ? (
         <>
-          {searchType === 'userWithMostPosts' ? (
-            <div>
-              <h2>Top User with Most Posts</h2>
-              {topUserWithMostPosts ? (
-                <p>
-                  <strong>Username:</strong> {topUserWithMostPosts.username}<br />
-                  <strong>Number of Posts:</strong> {topUserWithMostPosts.postCount}
-                </p>
-              ) : (
-                <p>Loading...</p>
-              )}
-            </div>
-          ) : (
-            <>
-              <form style={formStyle}>
-                <label style={labelStyle} htmlFor="searchType">
-                  Search Type:
-                </label>
-                <select
-                  style={selectStyle}
-                  id="searchType"
-                  value={searchType}
-                  onChange={(e) => setSearchType(e.target.value)}
-                >
-                  <option value="content">Content</option>
-                  <option value="username">Username</option>
-                  <option value="userWithMostPosts">User with Most Posts</option>
-                  <option value="userWithLeastPosts">User with Least Posts</option>
-                  <option value="mostLikedPost">Most Liked Post</option>
-                  <option value="postWithMostReplies">Post with Most Replies</option>
-                </select>
-  
-                <button style={buttonStyle} type="button" onClick={handleSearch}>
-                  Search
-                </button>
-              </form>
-  
-              {/* Display search results as a list */}
-              <div>
-                <h2>Search Results</h2>
-                <ul>
-                  {searchResults.map((result) => (
-                    <li key={result.message_id}>
-                      <strong>Content:</strong> {result.content}<br />
-                      <strong>Username:</strong> {result.username}<br />
-                      <strong>Channel:</strong> {result.channel_name}
-                    </li>
-                  ))}
-                </ul>
+          <div style={formStyle}>
+            <label style={labelStyle}>Search Term:</label>
+            <input
+              type="text"
+              style={inputStyle}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <button style={buttonStyle} onClick={handleSearch}>
+              Search
+            </button>
+          </div>
+
+          <div>
+            {searchResults.map((message, index) => (
+              <div key={index}>
+                <p>User: {message.user}</p>
+                <p>Channel: {message.channel}</p>
+                <p>Content: {message.content}</p>
+                {/* You can customize the display based on your message structure */}
               </div>
-            </>
-          )}
+            ))}
+          </div>
         </>
       ) : (
         <div>
@@ -178,6 +148,7 @@ function SearchPage() {
 }
 
 export default SearchPage;
+
 
 
 // {searchType === 'userWithMostPosts' || searchType === "userWithLeastPosts" || searchType === "mostLikedPost"  

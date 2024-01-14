@@ -121,6 +121,12 @@ function Navbar() {
             </Link>
           </li>
 
+          <li style={navItemStyle}>
+            <Link to="/StatsPage" style={navItemStyle}>
+              Stats
+            </Link>
+          </li>
+
 
 
           {/* {isUserLoggedIn && (

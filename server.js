@@ -64,7 +64,6 @@ app.post('/postChannel', (req, res) => {
   );
 });
 
-
 app.get('/getChannels', (req, res) => {
   connection.query('SELECT * FROM channels', (err, results) => {
     if (err) {
@@ -76,7 +75,6 @@ app.get('/getChannels', (req, res) => {
     res.status(200).json(results);
   });
 });
-
 
 // Create the 'channels' table if it doesn't exist
 connection.connect((err) => {
@@ -119,33 +117,6 @@ connection.connect((err) => {
       console.log('Table "message_votes" created or already exists.');
     });
 
-    // connection.query(`
-    //   CREATE TABLE IF NOT EXISTS message_votes (
-    //     vote_id INT AUTO_INCREMENT PRIMARY KEY,
-    //     message_id INT,
-    //     username VARCHAR(255) NOT NULL,
-    //     uservote ENUM('up', 'down') NOT NULL
-    //   )
-    // `, (err) => {
-    //   if (err) throw err;
-    //   console.log('Table "message_votes" created or already exists.');
-    // });
-
-    // connection.query(`
-    //   CREATE TABLE IF NOT EXISTS message_votes (
-    //       vote_id INT AUTO_INCREMENT PRIMARY KEY,
-    //       message_id INT,
-    //       username VARCHAR(255) NOT NULL, -- You might want to use the actual user ID instead of username
-    //       uservote ENUM('up', 'down') NOT NULL,
-    //       FOREIGN KEY (message_id) REFERENCES messages(message_id),
-    //       -- Add a foreign key constraint to reference the users table based on username
-    //       FOREIGN KEY (username) REFERENCES users(username)
-    //   )
-    // `, (err) => {
-    //     if (err) throw err;
-    //     console.log('Table "message_votes" created or already exists.');
-    // });
-
     connection.query(`
     CREATE TABLE IF NOT EXISTS users (
       user_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -180,17 +151,7 @@ connection.connect((err) => {
       console.log('Default user "Admin" already exists.');
     }
     });
-    // // Hardcode one entry into the 'users' table
-    // connection.query(`
-    //   INSERT INTO users (user_id, username, password)
-    //   VALUES (0, 'Admin', 'Admin')
-    // `, (err) => {
-    //   if (err) throw err;
-    //   console.log('Default user "Admin" inserted successfully.');
-    // });
 });
-
-
 
 app.delete('/deleteChannel/:channelId', (req, res) => {
   const channelId = req.params.channelId;
@@ -315,31 +276,6 @@ app.get('/checkChannel/:channelName', (req, res) => {
     }
   });
 });
-
-// app.delete('/deleteUser/:username', (req, res) => {
-//   const usernameToDelete = req.params.username;
-
-//   console.log("got here 1");
-//   console.log(usernameToDelete);
-
-//   // Delete the user from the 'users' table
-//   connection.query(
-//     'DELETE FROM users WHERE username = ?',
-//     [usernameToDelete],
-//     (err, result) => {
-//       if (err) {
-//         console.error('Error deleting user:', err);
-//         res.status(500).json({ error: 'Failed to delete the user' });
-//       } else if (result.affectedRows === 0) {
-//         // If no rows were affected, the user with the given username doesn't exist
-//         res.status(404).json({ error: 'User not found' });
-//       } else {
-//         console.log('User deleted successfully');
-//         res.status(200).json({ message: 'User deleted successfully' });
-//       }
-//     }
-//   );
-// });
 
 app.delete('/deleteUser/:username', (req, res) => {
   const usernameToDelete = req.params.username;
@@ -576,65 +512,6 @@ app.get('/getTopUserWithMostPosts', (req, res) => {
   });
 });
 
-// app.post('/postVote', (req, res) => {
-//   console.log('Received a POST request to record or remove a vote');
-
-//   const { messageId, voteType, username } = req.body;
-
-//   // Check if the opposite vote already exists
-//   const oppositeVoteType = voteType === 'up' ? 'down' : 'up';
-
-//   connection.query(
-//     'SELECT * FROM message_votes WHERE message_id = ? AND username = ? AND voteType = ?',
-//     [messageId, username, oppositeVoteType],
-//     (err, rows) => {
-//       if (err) {
-//         console.error('Error checking existing opposite vote:', err);
-//         res.status(500).json({ message: 'Failed to check existing opposite vote' });
-//       } else {
-//         // If an opposite vote exists, remove it
-//         if (rows.length > 0) {
-//           connection.query(
-//             'DELETE FROM message_votes WHERE message_id = ? AND username = ? AND voteType = ?',
-//             [messageId, username, oppositeVoteType],
-//             (err) => {
-//               if (err) {
-//                 console.error('Error removing existing opposite vote:', err);
-//                 res.status(500).json({ message: 'Failed to remove existing opposite vote' });
-//               } else {
-//                 console.log('Existing opposite vote removed successfully');
-//                 // Add the new vote after removing the opposite vote
-//                 addVote(messageId, username, voteType, res);
-//               }
-//             }
-//           );
-//         } else {
-//           // If no opposite vote exists, add the vote directly
-//           addVote(messageId, username, voteType, res);
-//         }
-//       }
-//     }
-//   );
-// });
-
-// // Helper function to add a new vote
-// function addVote(messageId, username, voteType, res) {
-//   connection.query(
-//     'INSERT INTO message_votes (message_id, username, voteType) VALUES (?, ?, ?)',
-//     [messageId, username, voteType],
-//     (err) => {
-//       if (err) {
-//         console.error('Error recording vote:', err);
-//         res.status(500).json({ message: 'Failed to record the vote' });
-//       } else {
-//         console.log('Vote recorded successfully');
-//         res.status(200).json({ message: 'Vote recorded successfully' });
-//       }
-//     }
-//   );
-// }
-
-
 app.post('/postVote', (req, res) => {
   console.log('Received a POST request to record or remove a vote');
 
@@ -706,8 +583,6 @@ app.post('/postVote', (req, res) => {
   );
 });
 
-
-
 app.get('/getVotes/:messageId', async (req, res) => {
   try {
     const messageId = req.params.messageId;
@@ -746,44 +621,77 @@ app.get('/getVotes/:messageId', async (req, res) => {
   }
 });
 
+app.get('/getChannelCreator/:channelName', async (req, res) => {
+  const channelName = req.params.channelName;
 
-// app.get('/getVotes/:messageId', async (req, res) => {
-//   try {
-//     const messageId = req.params.messageId;
+  connection.query('SELECT created_by FROM channels WHERE channel_name = ?', [channelName], (err, results) => {
+    if (err) {
+      console.error('Error getting channel creator:', err);
+      res.status(500).json({ error: 'Failed to get creator' });
+    } else {
+      const creatorUsername = results[0].created_by;
+      console.log('Successfully got username');
+      res.json({ creator: creatorUsername });
+    }
+  })
+});
 
-//     const query = `SELECT message_id, COUNT(*) as total_up_votes
-//                    FROM message_votes
-//                    WHERE message_id = ? AND votetype = 'up'
-//                    GROUP BY message_id`;
-    
+app.get('/userWithMostPosts', (req, res) => {
+  connection.query(`
+    SELECT username, COUNT(*) AS postCount
+    FROM messages
+    WHERE username != '[deleted]'
+    GROUP BY username
+    ORDER BY postCount DESC
+    LIMIT 1
+  `, (err, results) => {
+    if (err) {
+      console.error('Error retrieving user with most posts:', err);
+      res.status(500).json({ error: 'Failed to retrieve user with most posts' });
+    } else {
+      const topUser = results[0] || null;
+      console.log('Successfully got the user with most posts:', topUser);
 
-//     connection.query(query, [messageId], (error, results) => {
-//       if (error) {
-//         console.error('Error executing MySQL query:', error);
-//         res.status(500).json({ error: 'Internal Server Error' });
-//       } else {
-//         const upVoteCount = results.length > 0 ? results[0].total_up_votes : 0;
-//         console.log(upVoteCount);
-//         res.json({ upVoteCount: upVoteCount });
-//       }
-//     });  // Closing parenthesis for connection.query
+      if (topUser) {
+        // Send both username and postCount in the response
+        res.status(200).json({
+          username: topUser.username,
+          postCount: topUser.postCount
+        });
+      } else {
+        res.status(404).json({ error: 'No user found with posts' });
+      }
+    }
+  });
+});
 
-//   } catch (error) {
-//     console.error('Error getting votes:', error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// });  // Closing parenthesis for app.get
+app.get('/userWithLeastPosts', (req, res) => {
+  connection.query(`
+    SELECT username, COUNT(*) AS postCount
+    FROM messages
+    WHERE username != '[deleted]'
+    GROUP BY username
+    ORDER BY postCount ASC
+    LIMIT 1
+  `, (err, results) => {
+    if (err) {
+      console.error('Error retrieving user with least posts:', err);
+      res.status(500).json({ error: 'Failed to retrieve user with least posts' });
+    } else {
+      const bottomUser = results[0] || null;
+      console.log('Successfully got the user with least posts:', bottomUser);
 
-// app.get('/getCurrentUserName', (req, res) => {
-//   console.log(currentUserName);
-//   res.status(200).json({ currentUserName: currentUserName });
-// });
+      if (bottomUser) {
+        // Send both username and postCount in the response
+        res.status(200).json({
+          username: bottomUser.username,
+          postCount: bottomUser.postCount
+        });
+      } else {
+        res.status(404).json({ error: 'No user found with posts' });
+      }
+    }
+  });
+});
 
 
-// app.get('/isUserLoggedIn', (req, res) => {
-//   if (isUserLoggedIn === true) {
-//     res.status(200).json({ isLoggedIn: true });
-//   } else {
-//     res.status(400).json({ isLoggedIn: false });
-//   }
-// });
